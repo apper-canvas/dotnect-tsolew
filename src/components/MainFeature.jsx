@@ -4,13 +4,16 @@ import { toast } from 'react-toastify';
 import getIcon from '../utils/iconUtils';
 
 const MainFeature = ({ username }) => {
+  // Icons
   const Refresh = getIcon('RefreshCw');
   const Settings = getIcon('Settings');
   const User = getIcon('User');
   const UserPlus = getIcon('UserPlus');
+  const UserMinus = getIcon('UserMinus');
   const Volume2 = getIcon('Volume2');
   const VolumeX = getIcon('VolumeX');
   const Share = getIcon('Share2');
+  const Users = getIcon('Users');
   
   // Game settings
   const [gridSize, setGridSize] = useState(5);
@@ -112,12 +115,12 @@ const MainFeature = ({ username }) => {
       return;
     }
     
-    if (players.length >= 4) {
-      toast.error("Maximum 4 players allowed");
+    if (players.length >= 6) {
+      toast.error("Maximum 6 players allowed");
       return;
     }
     
-    const colors = ['#5383ED', '#FF6B6B', '#7C3AED', '#10B981'];
+    const colors = ['#5383ED', '#FF6B6B', '#7C3AED', '#10B981', '#F59E0B', '#EC4899'];
     const newId = players.length + 1;
     
     setPlayers([
@@ -134,6 +137,25 @@ const MainFeature = ({ username }) => {
     setNewPlayerName('');
     toast.success(`${newPlayerName} added to the game!`);
   };
+  // Remove a player
+  const removePlayer = (playerId) => {
+    if (players.length <= 2) {
+      toast.error("Minimum 2 players required");
+      return;
+    }
+    
+    // If removing the current player, adjust current player index
+    let nextPlayerIndex = currentPlayerIndex;
+    if (players[currentPlayerIndex].id === playerId) {
+      nextPlayerIndex = 0;
+    } else if (players.findIndex(p => p.id === playerId) < currentPlayerIndex) {
+      nextPlayerIndex = currentPlayerIndex - 1;
+    }
+    
+    setPlayers(players.filter(player => player.id !== playerId));
+    setCurrentPlayerIndex(nextPlayerIndex);
+  };
+  
   
   // Handle line click
   const handleLineClick = (lineType, id) => {
@@ -361,22 +383,31 @@ const MainFeature = ({ username }) => {
                 </div>
                 
                 <div>
-                  <label className="block mb-2 font-medium">Players</label>
-                  <div className="space-y-2 mb-4 max-h-40 overflow-y-auto">
+                  <label className="block mb-2 font-medium">Players <span className="text-sm text-surface-500">({players.length}/6)</span></label>
+                  <div className="space-y-2 mb-4 max-h-48 overflow-y-auto">
                     {players.map((player, index) => (
                       <div 
                         key={player.id} 
-                        className="flex items-center p-2 rounded-lg bg-surface-100 dark:bg-surface-800 border-l-4"
+                        className="flex items-center p-2 rounded-lg bg-surface-100 dark:bg-surface-800 border-l-4 group"
                         style={{ borderLeftColor: player.color }}
                       >
                         <div className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: player.color }}></div>
                         <span className="flex-grow font-medium">{player.username}</span>
                         <span className="text-sm text-surface-500 dark:text-surface-400">{player.score} pts</span>
+                        {players.length > 2 && (
+                          <button 
+                            onClick={() => removePlayer(player.id)}
+                            className="opacity-0 group-hover:opacity-100 transition-opacity text-surface-400 hover:text-secondary ml-2"
+                            aria-label={`Remove ${player.username}`}
+                          >
+                            <UserMinus size={16} />
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>
                   
-                  {players.length < 4 && (
+                  {players.length < 6 && (
                     <div className="flex gap-2">
                       <input
                         type="text"
@@ -530,7 +561,9 @@ const MainFeature = ({ username }) => {
                         {square.playerId === 2 && <User size={16} />}
                         {square.playerId === 3 && <User size={16} />}
                         {square.playerId === 4 && <User size={16} />}
-                      </motion.div>
+                        {square.playerId === 4 && <Users size={16} />}
+                        {square.playerId === 5 && <Users size={16} />}
+                        {square.playerId === 6 && <Users size={16} />}
                     )}
                   </motion.div>
                 </div>
@@ -564,7 +597,7 @@ const MainFeature = ({ username }) => {
         </div>
         
         <div className="md:w-64 lg:w-80 card overflow-hidden">
-          <h3 className="text-xl font-semibold mb-4">Players</h3>
+          <h3 className="text-xl font-semibold mb-4">Players <span className="text-sm font-normal text-surface-500">({players.length})</span></h3>
           
           <div className="space-y-3">
             {players.map((player) => (
@@ -583,7 +616,7 @@ const MainFeature = ({ username }) => {
                 }}
               >
                 <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3"
-                  style={{ backgroundColor: player.color }}
+                >
                 >
                   <User size={16} className="text-white" />
                 </div>
@@ -599,7 +632,7 @@ const MainFeature = ({ username }) => {
               </motion.div>
             ))}
           </div>
-          
+          <div className="mt-6 pt-4 border-t border-surface-200 dark:border-surface-700 text-sm">
           <div className="mt-6 pt-4 border-t border-surface-200 dark:border-surface-700">
             <h4 className="font-medium mb-2">How to Play</h4>
             <ul className="text-sm text-surface-600 dark:text-surface-400 space-y-2">

@@ -1,5 +1,10 @@
-import * as Icons from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 
-export default function getIcon(iconName) {
-  return Icons[iconName] || Icons.Smile;
-}
+const getIcon = (iconName) => {
+  if (LucideIcons[iconName]) {
+    return LucideIcons[iconName];
+  }
+  return null;
+};
+
+export default getIcon;
